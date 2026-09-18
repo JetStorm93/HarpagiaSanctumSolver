@@ -40,7 +40,7 @@ jobs:
             "build-tools;35.0.0"
 
       - name: Extract Sanctum project
-        run: unzip -o HarpagiaSanctumSolver-source-v4.zip
+        run: unzip -o HarpagiaSanctumSolver-source-v5.zip
 
       - name: Build debug APK
         run: gradle -p HarpagiaSanctumSolver assembleDebug
