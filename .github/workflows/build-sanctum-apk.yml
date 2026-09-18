@@ -1,0 +1,52 @@
+name: Build Harpagia Sanctum APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Configure Android SDK
+        run: |
+          echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+
+      - name: Accept Android licenses
+        run: |
+          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null || true
+
+      - name: Install Android SDK 35
+        run: |
+          /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+      - name: Extract Sanctum project
+        run: unzip -o HarpagiaSanctumSolver-source-v3.zip
+
+      - name: Build debug APK
+        run: gradle -p HarpagiaSanctumSolver assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HarpagiaSanctumSolver-APK-${{ github.run_id }}-${{ github.run_attempt }}
+          path: HarpagiaSanctumSolver/app/build/outputs/apk/debug/app-debug.apk
